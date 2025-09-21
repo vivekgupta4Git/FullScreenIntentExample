@@ -79,7 +79,7 @@ private fun Context.getFullScreenIntent(isLockScreen: Boolean): PendingIntent {
     val intent = Intent(this, destination)
 
     // flags and request code are 0 for the purpose of demonstration
-    return PendingIntent.getActivity(this, 0, intent, 0)
+    return PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE)
 }
 
 private const val CHANNEL_ID = "channelId"

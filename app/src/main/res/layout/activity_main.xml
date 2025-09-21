@@ -28,8 +28,14 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
 
+    tools:context=".MainActivity">
+    <View
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:id="@+id/space"
+        android:layout_width="match_parent"
+        android:layout_height="400dp"/>
     <Button
         android:id="@+id/showFullScreenIntentButton"
         android:layout_width="0dp"
@@ -38,7 +44,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHeight_min="wrap"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/space"
         app:layout_constraintWidth_min="wrap" />
 
     <Button

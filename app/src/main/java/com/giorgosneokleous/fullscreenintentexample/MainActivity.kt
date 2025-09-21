@@ -24,25 +24,90 @@
 
 package com.giorgosneokleous.fullscreenintentexample
 
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.widget.Button
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
+import androidx.core.view.WindowCompat
 
 class MainActivity : AppCompatActivity() {
+
+    enum class Options {
+        SHOW_NOTIFICATION_FULL_SCREEN,
+        SCHEDULE_NOTIFICATION_TRUE,
+        SCHEDULE_NOTIFICATION_FALSE
+    }
+
+    var currentOptions: Options = Options.SHOW_NOTIFICATION_FULL_SCREEN
+    val permissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
+            when (currentOptions) {
+                Options.SHOW_NOTIFICATION_FULL_SCREEN -> showNotificationWithFullScreenIntent()
+                Options.SCHEDULE_NOTIFICATION_TRUE -> scheduleNotification(true)
+                Options.SCHEDULE_NOTIFICATION_FALSE -> scheduleNotification(false)
+            }
+        }
+
+    val multiplePermissionsLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissionMap ->
+            if (permissionMap.all {
+                    ContextCompat.checkSelfPermission(
+                        this@MainActivity,
+                        it.key
+                    ) == PackageManager.PERMISSION_GRANTED
+                }) {
+                when (currentOptions) {
+                    Options.SHOW_NOTIFICATION_FULL_SCREEN -> showNotificationWithFullScreenIntent()
+                    Options.SCHEDULE_NOTIFICATION_TRUE -> scheduleNotification(true)
+                    Options.SCHEDULE_NOTIFICATION_FALSE -> scheduleNotification(false)
+                }
+            }
+        }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        WindowCompat.enableEdgeToEdge(window)
         setContentView(R.layout.activity_main)
 
         findViewById<Button>(R.id.showFullScreenIntentButton).setOnClickListener {
-            showNotificationWithFullScreenIntent()
+            currentOptions = Options.SHOW_NOTIFICATION_FULL_SCREEN
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                permissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+            } else
+                showNotificationWithFullScreenIntent()
         }
 
         findViewById<Button>(R.id.showFullScreenIntentWithDelayButton).setOnClickListener {
-            scheduleNotification(false)
+            currentOptions = Options.SCHEDULE_NOTIFICATION_FALSE
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                multiplePermissionsLauncher.launch(
+                    arrayOf(
+                        android.Manifest.permission.POST_NOTIFICATIONS,
+                        android.Manifest.permission.USE_EXACT_ALARM
+                    )
+                )
+            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                permissionLauncher.launch(android.Manifest.permission.SCHEDULE_EXACT_ALARM)
+            } else
+                scheduleNotification(false)
         }
 
         findViewById<Button>(R.id.showFullScreenIntentLockScreenWithDelayButton).setOnClickListener {
-            scheduleNotification(true)
+            currentOptions = Options.SCHEDULE_NOTIFICATION_TRUE
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                multiplePermissionsLauncher.launch(
+                    arrayOf(
+                        android.Manifest.permission.POST_NOTIFICATIONS,
+                        android.Manifest.permission.USE_EXACT_ALARM
+                    )
+                )
+            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                permissionLauncher.launch(android.Manifest.permission.SCHEDULE_EXACT_ALARM)
+            } else
+                scheduleNotification(true)
         }
     }
 }
