@@ -19,19 +19,16 @@ jobs:
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-    # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-    - uses: actions/checkout@v2
+      # Check out source code
+      - uses: actions/checkout@v4
 
-    - name: Set up Java
-      uses: actions/setup-java@v2
-      with:
-          java-version: 17
-          distribution: "temurin"
+      # Set up Java 17 (Temurin)
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
 
-    # Runs a single command using the runners shell
-    - name: Multi-command Runner
-      uses: giorgosneokleous93/docker-multicommand-android@v1.0.0
-      with:
-        command1: './gradlew app:assembleDebug'
-        command2: './gradlew lint'
-        command3: './gradlew test' 
+      # Build, lint, and test in one command
+      - name: Build with Gradle
+        run: ./gradlew build
